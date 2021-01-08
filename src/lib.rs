@@ -1,4 +1,3 @@
-use std::time;
 use ureq::{Agent, Request};
 
 pub struct DynConfig<'a> {
@@ -6,7 +5,6 @@ pub struct DynConfig<'a> {
     protocol: &'a str,
     username: &'a str,
     token: &'a str,
-    pub delay: time::Duration,
 }
 
 impl DynConfig<'_> {
@@ -15,14 +13,12 @@ impl DynConfig<'_> {
         protocol: &'a str,
         username: &'a str,
         token: &'a str,
-        delay: time::Duration,
     ) -> DynConfig<'a> {
         DynConfig {
             url,
             protocol,
             username,
             token,
-            delay,
         }
     }
 }
@@ -42,11 +38,6 @@ pub fn get_ip<'a>(agent: &Agent, config: &'a DynConfig) -> String {
 
 pub fn update_ip<'a>(agent: &Agent, config: &'a DynConfig, ip: &str) -> Request {
     // TODO: get the right url maybe an enum?
-    let update_url = format!(
-        "{}:{}@url/nic/update/{}",
-        config.username,
-        config.token,
-        ip
-    );
+    let update_url = format!("{}:{}@url/nic/update/{}", config.username, config.token, ip);
     return agent.post(&update_url);
 }
