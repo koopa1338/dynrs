@@ -1,6 +1,8 @@
 use ureq::{Agent, Request};
 use std::io::Error;
 
+pub const UPDATE_URL: &str = "http://checkip.spdns.de/";
+
 pub struct DynConfig<'a> {
     checkip_url: &'a str,
     service: Service,
