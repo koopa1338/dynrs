@@ -25,7 +25,7 @@ fn main() {
         Err(_) => false,
     };
 
-    let config: DynConfig = DynConfig::new(&checkip_url, Service::Spdns{ipv6: ipv6}, &username, &token);
+    let config: DynConfig = DynConfig::new(&checkip_url, Service::Spdns{ipv6}, &username, &token);
 
     let agent = Agent::new();
     let ip = get_ip(&agent, &config).unwrap();
