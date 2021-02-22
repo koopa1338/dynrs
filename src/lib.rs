@@ -1,59 +1,72 @@
-use ureq::{Agent, Request};
+use phf::{phf_map, Map};
 use std::io::Error;
+use ureq::{Agent, Request};
 
-pub const UPDATE_URL: &str = "http://checkip.spdns.de/";
+pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
 
-pub struct DynConfig<'a> {
-    checkip_url: &'a str,
-    service: Service,
+pub const PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
+    "spdns" => Provider::Spdns,
+    "dyndns" => Provider::Dyndns,
+};
+
+pub struct Credentials<'a> {
     username: &'a str,
-    token: &'a str
+    token: &'a str,
 }
 
-
-
-pub enum Service {
-    Spdns { ipv6: bool },
-    Dyndns { ipv6: bool },
-}
-
-impl DynConfig<'_> {
-    pub fn new<'a>(
-        checkip_url: &'a str,
-        service: Service,
-        username: &'a str,
-        token: &'a str,
-    ) -> DynConfig<'a> {
-        DynConfig {
-            checkip_url,
-            service,
-            username,
-            token,
-        }
+impl Credentials<'_> {
+    pub fn new<'a>(username: &'a str, token: &'a str) -> Credentials<'a> {
+        Credentials { username, token }
     }
 }
 
-pub fn get_ip<'a>(agent: &Agent, config: &'a DynConfig) -> Result<String, Error> {
-    agent.get(config.checkip_url).call().into_string()
+#[derive(Clone, Copy)]
+pub enum Provider {
+    Spdns,
+    Dyndns,
 }
 
-pub fn update_ip<'a>(agent: &Agent, config: &'a DynConfig, ip: &str) -> Request {
-    let update_url: String;
-    match config.service {
-        Service::Spdns {ipv6} => {
-            if ipv6 {
-                update_url = format!("{}:{}@url/nic/update/{}", config.username, config.token, ip);
-            } else {
-                update_url = format!("{}:{}@url/nic/update/{}", config.username, config.token, ip);
-            }
-        }
-        Service::Dyndns {ipv6} => {
-            if ipv6 {
-                update_url = format!("{}:{}@url/nic/update/{}", config.username, config.token, ip);
-            } else {
-                update_url = format!("{}:{}@url/nic/update/{}", config.username, config.token, ip);
-            }
+pub struct Handler {
+    provider: Provider,
+    ipv6: bool,
+    server_url: String,
+}
+
+impl Handler {
+    pub fn new(provider: Provider, ipv6: bool, server_url: String) -> Self {
+        Handler {
+            provider,
+            ipv6,
+            server_url,
         }
     }
-    return agent.get(&update_url);
+
+    pub fn update<'a>(self, agent: &Agent, creds: &'a Credentials) -> Result<Request, Error> {
+        let update_url: String;
+        let ipv6 = self.ipv6;
+        let ip = self.resolv(agent)?;
+        let user = creds.username;
+        let pw = creds.token;
+        match self.provider {
+            Provider::Spdns => {
+                if ipv6 {
+                    update_url = format!("{}:{}@ipv6url/nic/update/{}", user, pw, ip);
+                } else {
+                    update_url = format!("{}:{}@url/nic/update/{}", user, pw, ip);
+                }
+            }
+            Provider::Dyndns => {
+                if ipv6 {
+                    update_url = format!("{}:{}@ipv6url/nic/update/{}", user, pw, ip);
+                } else {
+                    update_url = format!("{}:{}@url/nic/update/{}", user, pw, ip);
+                }
+            }
+        }
+        Ok(agent.get(&update_url))
+    }
+
+    fn resolv(&self, agent: &Agent) -> Result<String, Error> {
+        agent.get(&self.server_url).call().into_string()
+    }
 }
