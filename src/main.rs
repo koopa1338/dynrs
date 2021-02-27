@@ -1,4 +1,4 @@
-use dynrs::{Credentials, Handler, Provider, FALLBACK_URL, PROVIDER_MAP};
+use dynrs::{Handler, Provider, FALLBACK_URL, PROVIDER_MAP};
 use ureq::Agent;
 
 fn main() {
@@ -31,9 +31,8 @@ fn main() {
 
     let ipv6 = settings.get_bool("ipv6").unwrap_or(false);
 
-    let creds: Credentials = Credentials::new(&username, &token);
     let handler: Handler = Handler::new(provider, ipv6, server_url);
 
     let agent = Agent::new();
-    handler.update(&agent, &creds).unwrap();
+    handler.update(&agent, &username, &token).unwrap();
 }

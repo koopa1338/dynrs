@@ -9,17 +9,6 @@ pub const PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "dyndns" => Provider::Dyndns,
 };
 
-pub struct Credentials<'a> {
-    username: &'a str,
-    token: &'a str,
-}
-
-impl Credentials<'_> {
-    pub fn new<'a>(username: &'a str, token: &'a str) -> Credentials<'a> {
-        Credentials { username, token }
-    }
-}
-
 #[derive(Clone, Copy)]
 pub enum Provider {
     Spdns,
@@ -41,25 +30,28 @@ impl Handler {
         }
     }
 
-    pub fn update<'a>(self, agent: &Agent, creds: &'a Credentials) -> Result<Request, Error> {
+    pub fn update<'a>(
+        self,
+        agent: &Agent,
+        username: &'a str,
+        token: &'a str,
+    ) -> Result<Request, Error> {
         let update_url: String;
         let ipv6 = self.ipv6;
         let ip = self.resolv(agent)?;
-        let user = creds.username;
-        let pw = creds.token;
         match self.provider {
             Provider::Spdns => {
                 if ipv6 {
-                    update_url = format!("{}:{}@ipv6url/nic/update/{}", user, pw, ip);
+                    update_url = format!("{}:{}@ipv6url/nic/update/{}", username, token, ip);
                 } else {
-                    update_url = format!("{}:{}@url/nic/update/{}", user, pw, ip);
+                    update_url = format!("{}:{}@url/nic/update/{}", username, token, ip);
                 }
             }
             Provider::Dyndns => {
                 if ipv6 {
-                    update_url = format!("{}:{}@ipv6url/nic/update/{}", user, pw, ip);
+                    update_url = format!("{}:{}@ipv6url/nic/update/{}", username, token, ip);
                 } else {
-                    update_url = format!("{}:{}@url/nic/update/{}", user, pw, ip);
+                    update_url = format!("{}:{}@url/nic/update/{}", username, token, ip);
                 }
             }
         }
