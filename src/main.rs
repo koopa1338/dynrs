@@ -34,5 +34,5 @@ fn main() {
     let handler: Handler = Handler::new(provider, ipv6, server_url);
 
     let agent = Agent::new();
-    handler.update(&agent, &username, &token).unwrap();
+    handler.update(&agent, &username, &token);
 }

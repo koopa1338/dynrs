@@ -1,5 +1,4 @@
 use phf::{phf_map, Map};
-use std::io::Error;
 use ureq::{Agent, Request};
 
 pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
@@ -35,10 +34,10 @@ impl Handler {
         agent: &Agent,
         username: &'a str,
         token: &'a str,
-    ) -> Result<Request, Error> {
+    ) -> Request {
         let update_url: String;
         let ipv6 = self.ipv6;
-        let ip = self.resolv(agent)?;
+        let ip = self.resolv(agent);
         match self.provider {
             Provider::Spdns => {
                 if ipv6 {
@@ -55,10 +54,10 @@ impl Handler {
                 }
             }
         }
-        Ok(agent.get(&update_url))
+        agent.get(&update_url)
     }
 
-    fn resolv(&self, agent: &Agent) -> Result<String, Error> {
-        agent.get(&self.server_url).call().into_string()
+    fn resolv(&self, agent: &Agent) -> String {
+        agent.get(&self.server_url).call().into_string().expect("No response from resolving.")
     }
 }
