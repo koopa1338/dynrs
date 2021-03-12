@@ -1,5 +1,5 @@
 use phf::{phf_map, Map};
-use ureq::{Agent, Request};
+use ureq::{Agent, Response};
 
 pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
 
@@ -32,19 +32,16 @@ impl Handler {
     pub fn update<'a>(
         self,
         agent: &Agent,
+        host: &'a str,
         username: &'a str,
         token: &'a str,
-    ) -> Request {
+    ) -> Response {
         let update_url: String;
         let ipv6 = self.ipv6;
         let ip = self.resolv(agent);
         match self.provider {
             Provider::Spdns => {
-                if ipv6 {
-                    update_url = format!("{}:{}@ipv6url/nic/update/{}", username, token, ip);
-                } else {
-                    update_url = format!("{}:{}@url/nic/update/{}", username, token, ip);
-                }
+                update_url = format!("https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}", host, ip, username, token);
             }
             Provider::Dyndns => {
                 if ipv6 {
@@ -54,7 +51,9 @@ impl Handler {
                 }
             }
         }
-        agent.get(&update_url)
+        // TODO: check status code and return an error if update was not successful
+        agent.get(&update_url).call()
+
     }
 
     fn resolv(&self, agent: &Agent) -> String {
