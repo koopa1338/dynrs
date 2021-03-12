@@ -19,6 +19,11 @@ fn main() {
         Err(_) => panic!("No provider specified"),
     };
 
+    let host = match settings.get_str("host") {
+        Ok(host) => host,
+        Err(_) => panic!("No host found in config file"),
+    };
+
     let username = match settings.get_str("username") {
         Ok(username) => username,
         Err(_) => panic!("No username found in config file"),
@@ -34,5 +39,5 @@ fn main() {
     let handler: Handler = Handler::new(provider, ipv6, server_url);
 
     let agent = Agent::new();
-    handler.update(&agent, &username, &token);
+    handler.update(&agent, &host, &username, &token);
 }
