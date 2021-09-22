@@ -16,6 +16,6 @@ impl DynamicDns for Spdns<'_> {
             "https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}",
             self.host, ip, self.username, self.token
         );
-        Ok(agent.get(&update_url).call()?)
+        agent.get(&update_url).call()
     }
 }

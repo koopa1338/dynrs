@@ -66,7 +66,11 @@ fn main() {
             handler.update(&agent).unwrap();
         }
         Provider::Dyndns => {
-            let handler = provider::dyndns::Dyndns { username, token };
+            let handler = provider::dyndns::Dyndns {
+                host,
+                username,
+                token,
+            };
             handler.update(&agent).unwrap();
         }
     };
