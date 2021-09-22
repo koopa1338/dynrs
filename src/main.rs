@@ -1,11 +1,12 @@
 #[macro_use]
 extern crate dotenv_codegen;
 
+mod provider;
+use provider::{duckdns::DuckDns, dyndns::Dyndns, noip::Noip, spdns::Spdns};
+
 use dotenv::dotenv;
 use dynrs::{DynamicDns, Provider, PROVIDER_MAP};
 use ureq::Agent;
-
-mod provider;
 
 fn main() {
     dotenv().ok();
@@ -58,21 +59,21 @@ fn main() {
     match provider {
         Provider::Spdns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::spdns::Spdns::new(host, username, token);
+            let handler = Spdns::new(host, username, token);
             handler.update(&agent).unwrap();
         }
         Provider::Dyndns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::dyndns::Dyndns::new(host, username, token);
+            let handler = Dyndns::new(host, username, token);
             handler.update(&agent).unwrap();
         }
         Provider::Duckdns => {
-            let handler = provider::duckdns::DuckDns::new(host, token);
+            let handler = DuckDns::new(host, token);
             handler.update(&agent).unwrap();
         }
         Provider::Noipdns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::noip::Noip::new(host, username, token);
+            let handler = Noip::new(host, username, token);
             handler.update(&agent).unwrap();
         }
     };
