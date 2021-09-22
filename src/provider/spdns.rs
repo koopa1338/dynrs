@@ -11,7 +11,7 @@ pub struct Spdns<'d> {
 
 impl DynamicDns for Spdns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
-        let ip = resolve(agent, RESOLVE_URL);
+        let ip = resolve(agent, Some(RESOLVE_URL));
         let update_url = format!(
             "https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}",
             self.host, ip, self.username, self.token

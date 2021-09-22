@@ -1,6 +1,8 @@
 use phf::{phf_map, Map};
 use ureq::{Agent, Error as UreqError, Response};
 
+pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
+
 pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "spdns" => Provider::Spdns,
     "dyndns" => Provider::Dyndns,
@@ -17,9 +19,9 @@ pub trait DynamicDns {
 }
 
 //TODO: handle ipv4 and ipv6
-pub fn resolve(agent: &Agent, url: &str) -> String {
+pub fn resolve(agent: &Agent, url: Option<&str>) -> String {
     agent
-        .get(url)
+        .get(url.unwrap_or(FALLBACK_URL))
         .call()
         .unwrap()
         .into_string()
