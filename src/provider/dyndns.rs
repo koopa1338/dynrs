@@ -7,6 +7,16 @@ pub struct Dyndns<'d> {
     pub token: &'d str,
 }
 
+impl<'d> Dyndns<'d> {
+    pub fn new(host: &'d str, username: &'d str, token: &'d str) -> Self {
+        Self {
+            host,
+            username,
+            token,
+        }
+    }
+}
+
 impl DynamicDns for Dyndns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = resolve(agent, None);

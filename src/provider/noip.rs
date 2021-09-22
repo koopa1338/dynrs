@@ -9,10 +9,24 @@ pub struct Noip<'d> {
     pub token: &'d str,
 }
 
+impl<'d> Noip<'d> {
+    pub fn new(host: &'d str, username: &'d str, token: &'d str) -> Self {
+        Self {
+            host,
+            username,
+            token,
+        }
+    }
+}
+
 impl DynamicDns for Noip<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         // NOTE: the second part of the string is the ip address
-        let ip = resolve(agent, Some(RESOLVE_URL)).split_whitespace().last().unwrap().to_string();
+        let ip = resolve(agent, Some(RESOLVE_URL))
+            .split_whitespace()
+            .last()
+            .unwrap()
+            .to_string();
         let update_url = format!(
             "https://{}:{}@dynupdate.no-ip.com/nic/update?hostname={}&myip={}",
             self.username, self.token, self.host, ip

@@ -58,37 +58,22 @@ fn main() {
     match provider {
         Provider::Spdns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::spdns::Spdns {
-                host,
-                username,
-                token,
-            };
+            let handler = provider::spdns::Spdns::new(host, username, token);
             handler.update(&agent).unwrap();
-        },
+        }
         Provider::Dyndns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::dyndns::Dyndns {
-                host,
-                username,
-                token,
-            };
+            let handler = provider::dyndns::Dyndns::new(host, username, token);
             handler.update(&agent).unwrap();
-        },
+        }
         Provider::Duckdns => {
-            let handler = provider::duckdns::DuckDns {
-                host,
-                token,
-            };
+            let handler = provider::duckdns::DuckDns::new(host, token);
             handler.update(&agent).unwrap();
         }
         Provider::Noipdns => {
             let username = dotenv!("USERNAME");
-            let handler = provider::noip::Noip {
-                host,
-                username,
-                token,
-            };
+            let handler = provider::noip::Noip::new(host, username, token);
             handler.update(&agent).unwrap();
-        },
+        }
     };
 }

@@ -9,6 +9,16 @@ pub struct Spdns<'d> {
     pub token: &'d str,
 }
 
+impl<'d> Spdns<'d> {
+    pub fn new(host: &'d str, username: &'d str, token: &'d str) -> Self {
+        Self {
+            host,
+            username,
+            token,
+        }
+    }
+}
+
 impl DynamicDns for Spdns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = resolve(agent, Some(RESOLVE_URL));
