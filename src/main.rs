@@ -12,7 +12,6 @@ fn main() {
 
     let prov = dotenv!("PROVIDER");
     let host = dotenv!("HOST");
-    let username = dotenv!("USERNAME");
     let token = dotenv!("TOKEN");
 
     let provider: Provider = match PROVIDER_MAP.get(prov) {
@@ -58,17 +57,26 @@ fn main() {
     let agent = Agent::new();
     match provider {
         Provider::Spdns => {
+            let username = dotenv!("USERNAME");
             let handler = provider::spdns::Spdns {
                 host,
                 username,
                 token,
             };
             handler.update(&agent).unwrap();
-        }
+        },
         Provider::Dyndns => {
+            let username = dotenv!("USERNAME");
             let handler = provider::dyndns::Dyndns {
                 host,
                 username,
+                token,
+            };
+            handler.update(&agent).unwrap();
+        },
+        Provider::Duckdns => {
+            let handler = provider::duckdns::DuckDns {
+                host,
                 token,
             };
             handler.update(&agent).unwrap();

@@ -6,12 +6,14 @@ pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
 pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "spdns" => Provider::Spdns,
     "dyndns" => Provider::Dyndns,
+    "duckdns" => Provider::Duckdns,
 };
 
 #[derive(Clone, Copy)]
 pub enum Provider {
     Spdns,
     Dyndns,
+    Duckdns,
 }
 
 pub trait DynamicDns {
