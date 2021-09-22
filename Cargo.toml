@@ -5,6 +5,7 @@ authors = ["koopa1338 <sinner1991@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-config = "0.10.1"
-phf = { version = "0.8.0", features = ["macros"] }
-ureq = "1.5.4"
+dotenv = "0.15.0"
+dotenv_codegen = "0.15.0"
+phf = { version = "0.10.0", features = ["macros"] }
+ureq = "2.2.0"

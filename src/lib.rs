@@ -3,7 +3,7 @@ use ureq::{Agent, Response};
 
 pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
 
-pub const PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
+pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "spdns" => Provider::Spdns,
     "dyndns" => Provider::Dyndns,
 };
@@ -35,13 +35,16 @@ impl Handler {
         host: &'a str,
         username: &'a str,
         token: &'a str,
-    ) -> Response {
+    ) -> Result<Response, ureq::Error> {
         let update_url: String;
         let ipv6 = self.ipv6;
         let ip = self.resolv(agent);
         match self.provider {
             Provider::Spdns => {
-                update_url = format!("https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}", host, ip, username, token);
+                update_url = format!(
+                    "https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}",
+                    host, ip, username, token
+                );
             }
             Provider::Dyndns => {
                 if ipv6 {
@@ -51,12 +54,15 @@ impl Handler {
                 }
             }
         }
-        // TODO: check status code and return an error if update was not successful
-        agent.get(&update_url).call()
-
+        Ok(agent.get(&update_url).call()?)
     }
 
     fn resolv(&self, agent: &Agent) -> String {
-        agent.get(&self.server_url).call().into_string().expect("No response from resolving.")
+        agent
+            .get(&self.server_url)
+            .call()
+            .unwrap()
+            .into_string()
+            .expect("No response from resolving.")
     }
 }
