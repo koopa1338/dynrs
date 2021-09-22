@@ -1,25 +1,23 @@
 #[macro_use]
 extern crate dotenv_codegen;
 
-use dynrs::{Handler, Provider, PROVIDER_MAP};
-use ureq::Agent;
 use dotenv::dotenv;
+use dynrs::{DynamicDns, Provider, PROVIDER_MAP};
+use ureq::Agent;
 
+mod provider;
 
 fn main() {
     dotenv().ok();
 
-    let server_url = dotenv!("SERVER_URL");
     let prov = dotenv!("PROVIDER");
     let host = dotenv!("HOST");
     let username = dotenv!("USERNAME");
     let token = dotenv!("TOKEN");
-    let tmp_ipv6 = dotenv!("IPV6");
-    let ipv6: bool = tmp_ipv6.parse().unwrap();
 
-    let provider: Provider =match PROVIDER_MAP.get(prov) {
+    let provider: Provider = match PROVIDER_MAP.get(prov) {
         Some(p) => *p,
-        None => Provider::Spdns,
+        None => panic!("unsupported Provider!"),
     };
 
     /* REVIEW: config crate not compiling, switched to dotenv for now
@@ -34,8 +32,7 @@ fn main() {
 
     let provider: Provider = match settings.get_str("provider") {
         Ok(provider) => match PROVIDER_MAP.get(provider.as_str()) {
-            Some(p) => *p,
-            None => Provider::Spdns,
+            Some(p) => *p, None => Provider::Spdns,
         },
         Err(_) => panic!("No provider specified"),
     };
@@ -58,8 +55,19 @@ fn main() {
     let ipv6 = settings.get_bool("ipv6").unwrap_or(false);
     */
 
-    let handler: Handler = Handler::new(provider, ipv6, server_url.to_string());
-
     let agent = Agent::new();
-    handler.update(&agent, &host, &username, &token).unwrap();
+    match provider {
+        Provider::Spdns => {
+            let handler = provider::spdns::Spdns {
+                host,
+                username,
+                token,
+            };
+            handler.update(&agent).unwrap();
+        }
+        Provider::Dyndns => {
+            let handler = provider::dyndns::Dyndns { username, token };
+            handler.update(&agent).unwrap();
+        }
+    };
 }

@@ -1,7 +1,5 @@
 use phf::{phf_map, Map};
-use ureq::{Agent, Response};
-
-pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
+use ureq::{Agent, Error as UreqError, Response};
 
 pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "spdns" => Provider::Spdns,
@@ -14,55 +12,16 @@ pub enum Provider {
     Dyndns,
 }
 
-pub struct Handler {
-    provider: Provider,
-    ipv6: bool,
-    server_url: String,
+pub trait DynamicDns {
+    fn update(&self, agent: &Agent) -> Result<Response, UreqError>;
 }
 
-impl Handler {
-    pub fn new(provider: Provider, ipv6: bool, server_url: String) -> Self {
-        Handler {
-            provider,
-            ipv6,
-            server_url,
-        }
-    }
-
-    pub fn update<'a>(
-        self,
-        agent: &Agent,
-        host: &'a str,
-        username: &'a str,
-        token: &'a str,
-    ) -> Result<Response, ureq::Error> {
-        let update_url: String;
-        let ipv6 = self.ipv6;
-        let ip = self.resolv(agent);
-        match self.provider {
-            Provider::Spdns => {
-                update_url = format!(
-                    "https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}",
-                    host, ip, username, token
-                );
-            }
-            Provider::Dyndns => {
-                if ipv6 {
-                    update_url = format!("{}:{}@ipv6url/nic/update/{}", username, token, ip);
-                } else {
-                    update_url = format!("{}:{}@url/nic/update/{}", username, token, ip);
-                }
-            }
-        }
-        Ok(agent.get(&update_url).call()?)
-    }
-
-    fn resolv(&self, agent: &Agent) -> String {
-        agent
-            .get(&self.server_url)
-            .call()
-            .unwrap()
-            .into_string()
-            .expect("No response from resolving.")
-    }
+//TODO: handle ipv4 and ipv6
+pub fn resolve(agent: &Agent, url: &str) -> String {
+    agent
+        .get(url)
+        .call()
+        .unwrap()
+        .into_string()
+        .expect("No response from resolving.")
 }
