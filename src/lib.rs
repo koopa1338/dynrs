@@ -14,6 +14,7 @@ pub enum Provider {
     Spdns,
     Dyndns,
     Duckdns,
+    Noipdns,
 }
 
 pub trait DynamicDns {

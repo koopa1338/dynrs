@@ -7,5 +7,5 @@ Update client for dynamic dns written in Rust.
 - [x] SpDYN
 - [x] DynDNS
 - [x] DuckDNS
-- [ ] No-IP
+- [x] No-IP
 - [ ] DynV6

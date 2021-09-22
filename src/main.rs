@@ -81,5 +81,14 @@ fn main() {
             };
             handler.update(&agent).unwrap();
         }
+        Provider::Noipdns => {
+            let username = dotenv!("USERNAME");
+            let handler = provider::noip::Noip {
+                host,
+                username,
+                token,
+            };
+            handler.update(&agent).unwrap();
+        },
     };
 }
