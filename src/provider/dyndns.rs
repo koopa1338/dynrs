@@ -2,9 +2,9 @@ use dynrs::{resolve, DynamicDns};
 use ureq::{Agent, Error as UreqError, Response};
 
 pub struct Dyndns<'d> {
-    pub host: &'d str,
-    pub username: &'d str,
-    pub token: &'d str,
+    host: &'d str,
+    username: &'d str,
+    token: &'d str,
 }
 
 impl<'d> Dyndns<'d> {

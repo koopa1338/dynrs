@@ -2,8 +2,8 @@ use dynrs::DynamicDns;
 use ureq::{Agent, Error as UreqError, Response};
 
 pub struct DuckDns<'d> {
-    pub host: &'d str,
-    pub token: &'d str,
+    host: &'d str,
+    token: &'d str,
 }
 
 impl<'d> DuckDns<'d> {

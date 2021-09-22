@@ -4,9 +4,9 @@ use ureq::{Agent, Error as UreqError, Response};
 const RESOLVE_URL: &str = "http://checkip.spdns.de/";
 
 pub struct Spdns<'d> {
-    pub host: &'d str,
-    pub username: &'d str,
-    pub token: &'d str,
+    host: &'d str,
+    username: &'d str,
+    token: &'d str,
 }
 
 impl<'d> Spdns<'d> {
