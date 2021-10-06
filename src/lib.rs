@@ -7,6 +7,7 @@ pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
     "spdns" => Provider::Spdns,
     "dyndns" => Provider::Dyndns,
     "duckdns" => Provider::Duckdns,
+    "noip" => Provider::Noipdns,
 };
 
 #[derive(Clone, Copy)]

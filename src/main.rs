@@ -11,11 +11,10 @@ use ureq::Agent;
 fn main() {
     dotenv().ok();
 
-    let prov = dotenv!("PROVIDER");
     let host = dotenv!("HOST");
     let token = dotenv!("TOKEN");
 
-    let provider: Provider = match PROVIDER_MAP.get(prov) {
+    let provider: Provider = match PROVIDER_MAP.get(dotenv!("PROVIDER")) {
         Some(p) => *p,
         None => panic!("unsupported Provider!"),
     };
