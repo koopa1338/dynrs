@@ -9,3 +9,6 @@ dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"
 phf = { version = "0.10.1", features = ["macros"] }
 ureq = "2.4.0"
+
+[profile.release]
+strip = true
