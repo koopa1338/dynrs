@@ -14,11 +14,10 @@ impl<'d> DuckDns<'d> {
 
 impl DynamicDns for DuckDns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
+        let host = self.host;
+        let token = self.token;
         //NOTE: duckdns will detect our ip address if we do not pass one.
-        let update_url = format!(
-            "https://www.duckdns.org/update?domains={}&token={}",
-            self.host, self.token
-        );
+        let update_url = format!("https://www.duckdns.org/update?domains={host}&token={token}");
         agent.get(&update_url).call()
     }
 }

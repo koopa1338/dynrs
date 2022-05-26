@@ -22,10 +22,10 @@ impl<'d> Spdns<'d> {
 impl DynamicDns for Spdns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = resolve(agent, Some(RESOLVE_URL));
-        let update_url = format!(
-            "https://update.spdyn.de/nic/update?hostname={}&myip={}&user={}&pass={}",
-            self.host, ip, self.username, self.token
-        );
+        let host = self.host;
+        let username = self.username;
+        let token = self.token;
+        let update_url = format!("https://update.spdyn.de/nic/update?hostname={host}&myip={ip}&user={username}&pass={token}");
         agent.get(&update_url).call()
     }
 }

@@ -25,11 +25,13 @@ impl DynamicDns for Noip<'_> {
         let ip = resolve(agent, Some(RESOLVE_URL))
             .split_whitespace()
             .last()
-            .unwrap()
+            .expect("Resolved IP was empty")
             .to_string();
+        let username = self.username;
+        let token = self.token;
+        let host = self.host;
         let update_url = format!(
-            "https://{}:{}@dynupdate.no-ip.com/nic/update?hostname={}&myip={}",
-            self.username, self.token, self.host, ip
+            "https://{username}:{token}@dynupdate.no-ip.com/nic/update?hostname={host}&myip={ip}"
         );
         // TODO: set the user agent as the api docs say to prevent blocking
         agent.get(&update_url).call()
