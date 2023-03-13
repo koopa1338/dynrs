@@ -1,4 +1,4 @@
-use dynrs::{resolve, DynamicDns};
+use dynrs::DynamicDns};
 use ureq::{Agent, Error as UreqError, Response};
 
 const RESOLVE_URL: &str = "http://checkip.spdns.de/";
@@ -7,6 +7,7 @@ pub struct Spdns<'d> {
     host: &'d str,
     username: &'d str,
     token: &'d str,
+    ip: Option<String>,
 }
 
 impl<'d> Spdns<'d> {
@@ -15,17 +16,23 @@ impl<'d> Spdns<'d> {
             host,
             username,
             token,
+            ip: None,
         }
+    }
+}
+
+impl<'d> ProviderTrait for Spdns<'d> {
+    fn update_url(&self) -> &str {
+        format!("https://update.spdyn.de/nic/update?hostname={host}&myip={ip}&user={username}&pass={token}", self.host, self.ip.unwrap(), self.username, self.token).sa_str()
+    }
+    fn update_ip(&mut self) {
+        self.ip = self.fetch_ip()
     }
 }
 
 impl DynamicDns for Spdns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = resolve(agent, Some(RESOLVE_URL));
-        let host = self.host;
-        let username = self.username;
-        let token = self.token;
-        let update_url = format!("https://update.spdyn.de/nic/update?hostname={host}&myip={ip}&user={username}&pass={token}");
         agent.get(&update_url).call()
     }
 }

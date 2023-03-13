@@ -5,7 +5,7 @@ mod provider;
 use provider::{duckdns::DuckDns, dyndns::Dyndns, noip::Noip, spdns::Spdns};
 
 use dotenv::dotenv;
-use dynrs::{DynamicDns, Provider, PROVIDER_MAP};
+use dynrs::{DynamicDns, Provider, ProviderType};
 use ureq::Agent;
 
 fn main() {
@@ -14,10 +14,7 @@ fn main() {
     let host = dotenv!("HOST");
     let token = dotenv!("TOKEN");
 
-    let provider: Provider = match PROVIDER_MAP.get(dotenv!("PROVIDER")) {
-        Some(p) => *p,
-        None => panic!("unsupported Provider!"),
-    };
+    let provider_type: ProviderType = dotenv!("PROVIDER").into();
 
     /* REVIEW: config crate not compiling, switched to dotenv for now
 
@@ -55,25 +52,25 @@ fn main() {
     */
 
     let agent = Agent::new();
-    match provider {
-        Provider::Spdns => {
+    let provider: Provider = match provider_type {
+        ProviderType::Spdns => {
             let username = dotenv!("USERNAME");
-            let handler = Spdns::new(host, username, token);
-            handler.update(&agent).unwrap();
+            let host_data = Spdns::new(host, username, token);
+            Provider::new(host_data)
         }
-        Provider::Dyndns => {
+        ProviderType::Dyndns => {
             let username = dotenv!("USERNAME");
-            let handler = Dyndns::new(host, username, token);
-            handler.update(&agent).unwrap();
+            let host_data = Dyndns::new(host, username, token);
+            Provider::new(host_data)
         }
-        Provider::Duckdns => {
-            let handler = DuckDns::new(host, token);
-            handler.update(&agent).unwrap();
+        ProviderType::Duckdns => {
+            let host_data = DuckDns::new(host, token);
+            Provider::new(host_data)
         }
-        Provider::Noipdns => {
+        ProviderType::Noipdns => {
             let username = dotenv!("USERNAME");
-            let handler = Noip::new(host, username, token);
-            handler.update(&agent).unwrap();
+            let host_data = Noip::new(host, username, token);
+            Provider::new(host_data)
         }
     };
 }
