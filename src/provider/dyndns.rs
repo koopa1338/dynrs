@@ -1,4 +1,4 @@
-use dynrs::{resolve, DynamicDns};
+use dynrs::DynamicDns;
 use ureq::{Agent, Error as UreqError, Response};
 
 pub struct Dyndns<'d> {
@@ -19,12 +19,10 @@ impl<'d> Dyndns<'d> {
 
 impl DynamicDns for Dyndns<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
-        let ip = resolve(agent, None);
-        let username = self.username;
-        let token = self.token;
-        let host = self.host;
+        let ip = &self.resolve(agent);
         let update_url = format!(
-            "https://{username}:{token}@members.dyndns.org/v3/update?hostname={host}&myip={ip}"
+            "https://{}:{}@members.dyndns.org/v3/update?hostname={}&myip={}",
+            self.username, self.token, self.host, ip
         );
         agent.get(&update_url).call()
     }

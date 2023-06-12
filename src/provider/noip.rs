@@ -1,4 +1,4 @@
-use dynrs::{resolve, DynamicDns};
+use dynrs::DynamicDns;
 use ureq::{Agent, Error as UreqError, Response};
 
 const RESOLVE_URL: &str = "https://dynupdate.no-ip.com/nic/update";
@@ -22,18 +22,21 @@ impl<'d> Noip<'d> {
 impl DynamicDns for Noip<'_> {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         // NOTE: the second part of the string is the ip address
-        let ip = resolve(agent, Some(RESOLVE_URL))
+        let ip = &self
+            .resolve(agent)
             .split_whitespace()
             .last()
             .expect("Resolved IP was empty")
             .to_string();
-        let username = self.username;
-        let token = self.token;
-        let host = self.host;
         let update_url = format!(
-            "https://{username}:{token}@dynupdate.no-ip.com/nic/update?hostname={host}&myip={ip}"
+            "https://{}:{}@dynupdate.no-ip.com/nic/update?hostname={}&myip={}",
+            self.username, self.token, self.host, ip
         );
         // TODO: set the user agent as the api docs say to prevent blocking
         agent.get(&update_url).call()
+    }
+
+    fn get_url(&self) -> Option<&str> {
+        Some(RESOLVE_URL)
     }
 }

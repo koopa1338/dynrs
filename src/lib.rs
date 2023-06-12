@@ -19,15 +19,19 @@ pub enum Provider {
 }
 
 pub trait DynamicDns {
-    fn update(&self, agent: &Agent) -> Result<Response, UreqError>;
-}
+    //TODO: handle ipv4 and ipv6
+    fn get_url(&self) -> Option<&str> {
+        None
+    }
 
-//TODO: handle ipv4 and ipv6
-pub fn resolve(agent: &Agent, url: Option<&str>) -> String {
-    agent
-        .get(url.unwrap_or(FALLBACK_URL))
-        .call()
-        .unwrap()
-        .into_string()
-        .expect("No response from resolving.")
+    fn resolve(&self, agent: &Agent) -> String {
+        agent
+            .get(self.get_url().unwrap_or(FALLBACK_URL))
+            .call()
+            .unwrap()
+            .into_string()
+            .expect("No response from resolving.")
+    }
+
+    fn update(&self, agent: &Agent) -> Result<Response, UreqError>;
 }
