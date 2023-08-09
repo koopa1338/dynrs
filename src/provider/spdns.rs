@@ -1,4 +1,4 @@
-use dynrs::DynamicDns;
+use crate::{DnsConfig, DynamicDns};
 use ureq::{Agent, Error as UreqError, Response};
 
 const RESOLVE_URL: &str = "http://checkip.spdns.de/";
@@ -10,11 +10,11 @@ pub struct Spdns<'d> {
 }
 
 impl<'d> Spdns<'d> {
-    pub fn new(host: &'d str, username: &'d str, token: &'d str) -> Self {
+    pub fn new(config: &'d DnsConfig) -> Self {
         Self {
-            host,
-            username,
-            token,
+            host: config.host,
+            username: config.username.expect("required username missing."),
+            token: config.token,
         }
     }
 }

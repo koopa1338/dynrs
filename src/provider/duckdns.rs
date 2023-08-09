@@ -1,4 +1,4 @@
-use dynrs::DynamicDns;
+use crate::{DnsConfig, DynamicDns};
 use ureq::{Agent, Error as UreqError, Response};
 
 pub struct DuckDns<'d> {
@@ -7,8 +7,11 @@ pub struct DuckDns<'d> {
 }
 
 impl<'d> DuckDns<'d> {
-    pub fn new(host: &'d str, token: &'d str) -> Self {
-        Self { host, token }
+    pub fn new(config: &'d DnsConfig) -> Self {
+        Self {
+            host: config.host,
+            token: config.token,
+        }
     }
 }
 
