@@ -7,6 +7,7 @@ pub struct DuckDns<'d> {
 }
 
 impl<'d> DuckDns<'d> {
+    #[must_use]
     pub fn new(config: &'d DnsConfig) -> Self {
         Self {
             host: config.host,

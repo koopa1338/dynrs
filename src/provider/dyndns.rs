@@ -8,6 +8,7 @@ pub struct Dyndns<'d> {
 }
 
 impl<'d> Dyndns<'d> {
+    #[must_use]
     pub fn new(config: &'d DnsConfig) -> Self {
         Self {
             host: config.host,

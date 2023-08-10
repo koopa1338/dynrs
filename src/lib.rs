@@ -32,7 +32,14 @@ pub struct DnsConfig<'dns> {
     pub username: Option<&'dns str>,
 }
 
+impl<'dns> Default for DnsConfig<'dns> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'dns> DnsConfig<'dns> {
+    #[must_use]
     pub fn new() -> Self {
         let mut settings_path = if let Ok(xdg_env) = std::env::var("XDG_CONFIG_HOME") {
             PathBuf::from(xdg_env)
@@ -49,6 +56,8 @@ impl<'dns> DnsConfig<'dns> {
             .try_deserialize::<Self>()
             .expect("could not read config file")
     }
+
+    #[inline(always)]
     pub fn run(&self, agent: &Agent) {
         let handler: Box<dyn DynamicDns> = match self.provider {
             Provider::Spdns => Box::new(Spdns::new(self)),
