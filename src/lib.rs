@@ -4,28 +4,18 @@ use config::{Config, File};
 use serde::Deserialize;
 use ureq::{Agent, Error as UreqError, Response};
 
-pub mod provider;
-use provider::{duckdns::DuckDns, dyndns::Dyndns, noip::Noip, spdns::Spdns};
-
 pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
 
-#[derive(Clone, Copy, Debug, Deserialize)]
-pub enum Provider {
-    Spdns,
-    Dyndns,
-    Duckdns,
-    Noipdns,
-}
-
 #[derive(Debug, Deserialize)]
-pub struct DnsConfig {
-    pub provider: Provider,
+pub struct DnsClient {
     pub host: String,
-    pub token: String,
+    pub secret: String,
+    pub update_url: String,
     pub username: Option<String>,
+    pub resolve_url: Option<String>,
 }
 
-impl DnsConfig {
+impl DnsClient {
     #[must_use]
     pub fn new(config_path: impl AsRef<Path>) -> Self {
         let settings = Config::builder()
@@ -45,18 +35,6 @@ impl DnsConfig {
             .try_deserialize::<Self>()
             .expect("could not read config file")
     }
-
-    #[inline(always)]
-    pub fn run(self, agent: &Agent) {
-        let handler: Box<dyn DynamicDns> = match self.provider {
-            Provider::Spdns => Box::new(Spdns::new(self)),
-            Provider::Dyndns => Box::new(Dyndns::new(self)),
-            Provider::Duckdns => Box::new(DuckDns::new(self)),
-            Provider::Noipdns => Box::new(Noip::new(self)),
-        };
-
-        handler.update(agent).unwrap();
-    }
 }
 
 pub trait DynamicDns {
@@ -67,7 +45,7 @@ pub trait DynamicDns {
 
     fn resolve(&self, agent: &Agent) -> String {
         agent
-            .get(self.get_url().unwrap_or(FALLBACK_URL))
+            .get(&self.get_url().unwrap_or(FALLBACK_URL))
             .call()
             .unwrap()
             .into_string()
@@ -75,4 +53,24 @@ pub trait DynamicDns {
     }
 
     fn update(&self, agent: &Agent) -> Result<Response, UreqError>;
+}
+
+impl DynamicDns for DnsClient {
+    fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
+        let ip = &self
+            .resolve(agent)
+            .split_whitespace()
+            .last()
+            .expect("Resolved IP was empty")
+            .to_string();
+
+        // TODO: format with url crate and add the params
+        let update_url = &self.update_url;
+
+        agent.get(&self.update_url).call()
+    }
+
+    fn get_url(&self) -> Option<&str> {
+        self.resolve_url.as_deref()
+    }
 }
