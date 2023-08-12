@@ -3,15 +3,15 @@ use ureq::{Agent, Error as UreqError, Response};
 
 const RESOLVE_URL: &str = "http://checkip.spdns.de/";
 
-pub struct Spdns<'d> {
-    host: &'d str,
-    username: &'d str,
-    token: &'d str,
+pub struct Spdns {
+    host: String,
+    username: String,
+    token: String,
 }
 
-impl<'d> Spdns<'d> {
+impl Spdns {
     #[must_use]
-    pub fn new(config: &'d DnsConfig) -> Self {
+    pub fn new(config: DnsConfig) -> Self {
         Self {
             host: config.host,
             username: config.username.expect("required username missing."),
@@ -20,7 +20,7 @@ impl<'d> Spdns<'d> {
     }
 }
 
-impl DynamicDns for Spdns<'_> {
+impl DynamicDns for Spdns {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = &self.resolve(agent);
         let update_url = format!(

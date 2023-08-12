@@ -1,15 +1,15 @@
 use crate::{DynamicDns, DnsConfig};
 use ureq::{Agent, Error as UreqError, Response};
 
-pub struct Dyndns<'d> {
-    host: &'d str,
-    username: &'d str,
-    token: &'d str,
+pub struct Dyndns {
+    host: String,
+    username: String,
+    token: String,
 }
 
-impl<'d> Dyndns<'d> {
+impl Dyndns {
     #[must_use]
-    pub fn new(config: &'d DnsConfig) -> Self {
+    pub fn new(config: DnsConfig) -> Self {
         Self {
             host: config.host,
             username: config.username.expect("required username not found"),
@@ -18,7 +18,7 @@ impl<'d> Dyndns<'d> {
     }
 }
 
-impl DynamicDns for Dyndns<'_> {
+impl DynamicDns for Dyndns {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         let ip = &self.resolve(agent);
         let update_url = format!(

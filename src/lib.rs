@@ -1,20 +1,13 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use config::{Config, File};
-use phf::{phf_map, Map};
 use serde::Deserialize;
 use ureq::{Agent, Error as UreqError, Response};
+
 pub mod provider;
 use provider::{duckdns::DuckDns, dyndns::Dyndns, noip::Noip, spdns::Spdns};
 
 pub const FALLBACK_URL: &str = "http://checkip.spdns.de/";
-
-pub static PROVIDER_MAP: Map<&'static str, Provider> = phf_map! {
-    "spdns" => Provider::Spdns,
-    "dyndns" => Provider::Dyndns,
-    "duckdns" => Provider::Duckdns,
-    "noip" => Provider::Noipdns,
-};
 
 #[derive(Clone, Copy, Debug, Deserialize)]
 pub enum Provider {
@@ -25,30 +18,26 @@ pub enum Provider {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct DnsConfig<'dns> {
+pub struct DnsConfig {
     pub provider: Provider,
-    pub host: &'dns str,
-    pub token: &'dns str,
-    pub username: Option<&'dns str>,
+    pub host: String,
+    pub token: String,
+    pub username: Option<String>,
 }
 
-impl<'dns> Default for DnsConfig<'dns> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<'dns> DnsConfig<'dns> {
+impl DnsConfig {
     #[must_use]
-    pub fn new() -> Self {
-        let mut settings_path = if let Ok(xdg_env) = std::env::var("XDG_CONFIG_HOME") {
-            PathBuf::from(xdg_env)
-        } else {
-            PathBuf::from(std::env!("HOME")).join(".config")
-        };
-        settings_path.push("dynrs/config");
+    pub fn new(config_path: impl AsRef<Path>) -> Self {
         let settings = Config::builder()
-            .add_source(File::with_name(settings_path.to_string_lossy().as_ref()).required(true))
+            .add_source(
+                File::with_name(
+                    config_path
+                        .as_ref()
+                        .to_str()
+                        .expect("no config file provided"),
+                )
+                .required(true),
+            )
             .build()
             .expect("config not found.");
 
@@ -58,7 +47,7 @@ impl<'dns> DnsConfig<'dns> {
     }
 
     #[inline(always)]
-    pub fn run(&self, agent: &Agent) {
+    pub fn run(self, agent: &Agent) {
         let handler: Box<dyn DynamicDns> = match self.provider {
             Provider::Spdns => Box::new(Spdns::new(self)),
             Provider::Dyndns => Box::new(Dyndns::new(self)),

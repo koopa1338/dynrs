@@ -3,15 +3,15 @@ use ureq::{Agent, Error as UreqError, Response};
 
 const RESOLVE_URL: &str = "https://dynupdate.no-ip.com/nic/update";
 
-pub struct Noip<'d> {
-    host: &'d str,
-    username: &'d str,
-    token: &'d str,
+pub struct Noip {
+    host: String,
+    username: String,
+    token: String,
 }
 
-impl<'d> Noip<'d> {
+impl Noip {
     #[must_use]
-    pub fn new(config: &'d DnsConfig) -> Self {
+    pub fn new(config: DnsConfig) -> Self {
         Self {
             host: config.host,
             username: config.username.expect("required username missing."),
@@ -20,7 +20,7 @@ impl<'d> Noip<'d> {
     }
 }
 
-impl DynamicDns for Noip<'_> {
+impl DynamicDns for Noip {
     fn update(&self, agent: &Agent) -> Result<Response, UreqError> {
         // NOTE: the second part of the string is the ip address
         let ip = &self
