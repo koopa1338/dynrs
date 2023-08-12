@@ -1,6 +1,6 @@
 [package]
 name = "dynrs"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["koopa1338 <sinner1991@gmail.com>"]
 edition = "2021"
 
